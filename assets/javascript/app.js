@@ -64,6 +64,22 @@ $(document).ready(function () {
                 // Only taking action if the photo has an appropriate rating
                 if (results[i].rating !== "r" && results[i].rating !== "pg-13") {
 
+                    // Creating a div for the buttons
+                    var buttonDiv = $("<div>");
+
+                    // Create a download button
+                    var downButton = $('<button>').text("Download");
+                    downButton.addClass('ans-option btn btn-primary');
+                    downButton.attr("id", "downButton");
+
+                    // Create a favorite button
+                    var favButton = $('<button>').text("Favorite");
+                    favButton.addClass('ans-option btn btn-primary');
+                    favButton.attr("id", "favButton");
+
+                    $(buttonDiv).append(downButton);
+                    $(buttonDiv).append(favButton);
+
                     // Creating a div for the gif
                     var gifDiv = $("<div>");
 
@@ -103,6 +119,7 @@ $(document).ready(function () {
                     gifDiv.append(p);
 
                     // Appending the gifDiv to the "#gifs-appear-here" div in the HTML
+                    $("#gifs-appear-here").append(buttonDiv);
                     $("#gifs-appear-here").append(gifDiv);
                 }
             }
