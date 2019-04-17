@@ -3,30 +3,59 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Stop: It's Giphy time</title>
+
+    <title>GifTastic</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Reset browsers to initial conditions -->
+    <link rel="stylesheet" href="./assets/css/reset.css">
+
+    <!-- Bootstrap 4 minimum style sheet -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+    <!-- App style sheet -->
+    <link rel="stylesheet" href="./assets/css/style.css">
+
 </head>
 
 <body>
 
     <div id="buttons-appear-here">
-        <button class="animalButton" data-animal="Cat">Cat</button>
-        <button class="animalButton" data-animal="Dog">Dog</button>
-        <button class="animalButton" data-animal="Pig">Pig</button>
-        <button class="animalButton" data-animal="Horse">Horse</button>
-        <button class="animalButton" data-animal="Kangaroo">Kangaroo</button>
+        <button class="itemButton" data-item="Cat">Cat</button>
+        <button class="itemButton" data-item="Dog">Dog</button>
+        <button class="itemButton" data-item="Pig">Pig</button>
+        <button class="itemButton" data-item="Horse">Horse</button>
+        <button class="itemButton" data-item="Kangaroo">Kangaroo</button>
     </div>
 
-    <div id="newAnimalButton">
-        <input id="newAnimal" type="text">
+    <div id="newItemButton">
+        <input id="newItem" type="text">
         <input id="newButton" type="submit">
         <button id="addTen">Add 10</button>
+        <button id="showFav">Show Favorites</button>
+        <button id="clearFav">Clear Favorites</button>
     </div>
 
     <div id="gifs-appear-here">
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <div id="favDiv" style="display: none">
+        Favorites
+        <div id="favorites">
+        </div>
+    </div>
+
+
+    <!-- Various JavaScript libraries needed to make some of the Bootstrap styling work. -->
+    <!-- For example, the collapsing nav bar will not work without these. -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <!-- App javascript -->
     <script src="./assets/javascript/app.js"></script>
+
 </body>
 
 </html>
