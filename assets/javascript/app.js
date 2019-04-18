@@ -1,11 +1,11 @@
 // ToDo
-// Don't allow duplicate favorites
-// Do Download
-// Do responsive display
+// Don't allow duplicate favorites - Done
 // Integrate this search with additional APIs such as OMDB, or Bands in Town. Be creative and build something you are proud to showcase in your portfolio
 // Persist favorites with localStorage
 // Improve README.md
 // Improve style
+// Do responsive display
+// Do Download
 $(document).ready(function () {
 
     var appData = {
@@ -13,8 +13,7 @@ $(document).ready(function () {
         gifData: null,
         queryURL: null,
         isShowGifs: true,
-        currentAnimal: null,
-        currentAnimal: null,
+        currentItem: null,
         favoritesStill: [],
         favoritesAnimate: [],
         favPointer: 0,
@@ -257,7 +256,16 @@ $(document).ready(function () {
         console.log("Action " + action)
 
         // Handle favorite action
+        // Look for dups
         if (action === "favorite") {
+            console.log("Favorite");
+            console.log($(this).attr("data-url-still"));
+            for (var i = 0; i < appData.favoritesStill.length; i++) {
+                if (appData.favoritesStill[i] === $(this).attr("data-url-still")) {
+                    console.log("Dup match");
+                    return;
+                }
+            }
             appData.favPointer = appData.favoritesStill.length;
             appData.favoritesStill.push($(this).attr("data-url-still"));
             appData.favoritesAnimate.push($(this).attr("data-url-animate"));
@@ -268,6 +276,25 @@ $(document).ready(function () {
         if (action === "download") {
             console.log("Download");
             console.log($(this).attr("data-url-still"));
+
+            var urlDown = $(this).attr("data-url-still");
+            console.log(urlDown);
+
+            $.ajax({
+                url: 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/172905/test.pdf',
+                method: 'GET',
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function (data) {
+                    var a = document.createElement('a');
+                    var url = window.URL.createObjectURL(data);
+                    a.href = url;
+                    a.download = 'myfile.pdf';
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                }
+            });
         }
     });
 
