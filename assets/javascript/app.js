@@ -62,6 +62,7 @@ $(document).ready(function () {
     // $("button").on("click", function () {
     $('#buttons-appear-here').on("click", ".itemButton", function () {
 
+        console.log($(this));
         // Show GIF display
         appData.isShowGifs = true;
         $("#gifs-appear-here").show();
@@ -156,7 +157,7 @@ $(document).ready(function () {
                     var gifDiv = $("<div>");
 
                     // Creating an image tag with class of "gif"
-                    var itemImage = $("<img>").addClass("gif");
+                    var itemImage = $("<img>").addClass("gif img-fluid");
 
                     // Giving the image tag an src attribute of a property pulled off the
                     // result item
@@ -304,8 +305,8 @@ $(document).ready(function () {
         // Creating a div for the gif
         var gifDiv = $("<div>");
 
-        // Creating an image tag with class of "gif"
-        var itemImage = $("<img>").addClass("fav");
+        // Creating an image tag with class of "fav"
+        var itemImage = $("<img>").addClass("fav img-fluid");
 
         // Giving the image tag an src attribute of a property pulled off the
         // result item
@@ -426,8 +427,8 @@ $(document).ready(function () {
         // Creating a div for the gif
         var gifDiv = $("<div>");
 
-        // Creating an image tag with class of "gif"
-        var itemImage = $("<img>").addClass("fav");
+        // Creating an image tag with class of "fav"
+        var itemImage = $("<img>").addClass("fav img-fluid");
 
         for (var i = 0; i < appData.favoritesStill.length; i++) {
 
