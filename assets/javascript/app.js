@@ -1,11 +1,17 @@
 // ToDo
-// Don't allow duplicate favorites - Done
-// Integrate this search with additional APIs such as OMDB, or Bands in Town. Be creative and build something you are proud to showcase in your portfolio
+// DONE - Don't allow duplicate favorites
+// Allow user to set how many images per row
+// Pop up a modal window with full JSON for an image
+// Integrate this search with additional APIs such as OMDB, 
+//   or Bands in Town. Be creative and build something you are 
+//   proud to showcase in your portfolio
 // Persist favorites with localStorage
 // Improve README.md
 // Improve style
 // Do responsive display
-// Do Download
+// Fix problem with creating a new search button where search keyword is empty
+//    Also test for case where search returns 0 items
+// Do Download function
 $(document).ready(function () {
 
     var appData = {
@@ -32,37 +38,41 @@ $(document).ready(function () {
     }
 
     // Add ten more images
+    // This is done by incrementing by ten the offset variable
+    // used in the Giphy query and getting the next set of images
     $("#addTen").on("click", function () {
         appData.iOffset += 10;
         displayImages();
     });
 
-    // Show favorites
+    // Show gifs/favorites
     $("#showFav").on("click", function () {
-        console.log("Fav ");
-        console.log($(this));
+
+        // If gifs on then switch to favs
         if (appData.isShowGifs) {
             appData.isShowGifs = false;
             $("#gifs-appear-here").hide();
             $("#favDiv").show();
-            // $("#favDiv").style.visibility = "visible"
             $("#showFav").text("Hide Favorites");
-        } else {
+        }
+
+        // If favs on then switch to gifs
+        else {
             appData.isShowGifs = true;
             $("#gifs-appear-here").show();
             $("#favDiv").hide();
             // $("#favDiv").style.visibility = "hidden"
             $("#showFav").text("Show Favorites");
-
         }
+
     });
 
     // Event listener for all .itemButton elements
+    // This function will grab a new set of gifs
     // Revised this event handler to allow for dynamically created buttons
-    // $("button").on("click", function () {
+    // looking for clicks in the parent div
     $('#buttons-appear-here').on("click", ".itemButton", function () {
 
-        console.log($(this));
         // Show GIF display
         appData.isShowGifs = true;
         $("#gifs-appear-here").show();
@@ -81,42 +91,38 @@ $(document).ready(function () {
             // Clear gif div
             $("#gifs-appear-here").empty();
 
-            // Reset offset
+            // Reset offset when a new category is chosen
             appData.iOffset = 0;
 
-            // Show the gid div
-            appData.showGifs = true;
-            $("#gifs-appear-here").show();
-
-            console.log("Here 1 " + appData.currentItem + " " + appData.item);
-
-            // Upate the current item and display images
+            // Upate the current item
             appData.currentItem = appData.item;
+
+            // Display images
             displayImages();
 
-        } else {
-            console.log("Here 2 " + appData.currentItem + " " + appData.item);
+        }
 
-
+        // Return if button selected matches the current set displayed
+        else {
             return;
         }
 
     });
 
-    // Get a new item on submit click
-    // This function handles all elements with the "gif" class inside 
-    // the "#gifs-appear-here" div and adds
-    // an event handler for the "click" event
+    // Create a new itemButton on submit click
     $('#newButton').on("click", function () {
-        console.log($(this));
-        console.log($("#newItem").val());
-        var itemName = $("#newItem").val()
-        console.log($(typeof (itemName) + " " + itemName));
+        var itemName = $("#newItem").val().trim();
 
+        // Return if no entry in text field
+        if (itemName === null ||
+            itemName.length === 0) {
+            return;
+        }
+
+        // Create a new button
         var newButton = $("<button>").text($("#newItem").val()).attr("data-item", $("#newItem").val());
-        newButton.addClass("itemButton");
-        var buttonDiv = $("#buttons-appear-here");
-        buttonDiv.append(newButton);
+        newButton.addClass("btn btn-primary itemButton");
+        $("#buttons-appear-here").append(newButton);
     });
 
     // Create and display image objects
@@ -147,17 +153,27 @@ $(document).ready(function () {
 
             // console.log(JSON.stringify(results[0]));
 
+            // Create a new row for this set of Gifs
+            var newRow = $("<div>").addClass("row align-items-center");
+
             // Looping over every result item
             for (var i = 0; i < results.length; i++) {
 
-                // Only taking action if the photo has an appropriate rating
+                // Only take further action if the photo has an appropriate rating
                 if (results[parseInt(i)].rating !== "r" && results[parseInt(i)].rating !== "pg-13") {
 
                     // Creating a div for the gif
-                    var gifDiv = $("<div>");
+                    var gifDiv = $("<div>").addClass("col-sm-12 col-md-6 col-lg-4 d-flex align-items-stretch");
+
+                    // // Creating a div for the gif
+                    // var gifDiv = $("<div>");
+
+                    // Create a card for image
+                    var newCard = $("<div>").addClass("card gifCard");
+                    var newCardBody = $("<div>").addClass("card-body");
 
                     // Creating an image tag with class of "gif"
-                    var itemImage = $("<img>").addClass("gif img-fluid");
+                    var itemImage = $("<img>").addClass("gif gifImage card-img-top img-fluid");
 
                     // Giving the image tag an src attribute of a property pulled off the
                     // result item
@@ -180,24 +196,9 @@ $(document).ready(function () {
 
                     // Append itemImage, image buttons, and image info to 
                     // the "gifDiv" div created
-                    gifDiv.append(itemImage);
+                    newCardBody.append(itemImage);
 
-                    // Create a download button
-                    var downButton = $('<button>').text("Download");
-                    downButton.addClass('action-option btn btn-primary');
-                    downButton.attr("data-action", "download");
-                    downButton.attr("data-url-still", results[parseInt(i)].images.original_still.url);
-                    downButton.attr("data-url-animate", results[parseInt(i)].images.original.url);
-
-                    // Create a favorite button
-                    var favButton = $('<button>').text("Favorite");
-                    favButton.addClass('action-option btn btn-primary');
-                    favButton.attr("data-action", "favorite");
-                    favButton.attr("data-url-still", results[parseInt(i)].images.original_still.url);
-                    favButton.attr("data-url-animate", results[parseInt(i)].images.original.url);
-
-                    $(gifDiv).append(downButton);
-                    $(gifDiv).append(favButton);
+                    // gifDiv.append(itemImage);
 
                     // Storing the result item's rating
                     var rating = results[parseInt(i)].rating;
@@ -207,10 +208,44 @@ $(document).ready(function () {
 
                     // Creating a paragraph tag with the result item's rating
                     var p = $("<p>").html("Rating: " + rating + "<br>" + "Title: " + title);
-                    $(gifDiv).append(p);
+                    p.addClass("card-text");
+                    newCardBody.append(p);
+                    // $(gifDiv).append(p);
+
+                    // Create a moreInfo button
+                    var moreInfoButton = $('<button>').text("More Info");
+                    moreInfoButton.addClass('action-option btn btn-info btn-lg');
+                    moreInfoButton.attr("data-toggle", "modal");
+                    moreInfoButton.attr("data-target", "#moreInfoModal");
+                    moreInfoButton.attr("data-action", "moreInfo");
+                    moreInfoButton.attr("data-results", results[parseInt(i)]);
+                    moreInfoButton.attr("data-index", parseInt(i));
+
+                    // Create a favorite button
+                    var favButton = $('<button>').text("Favorite");
+                    favButton.addClass('action-option btn btn-primary');
+                    favButton.attr("data-action", "favorite");
+                    favButton.attr("data-url-still", results[parseInt(i)].images.original_still.url);
+                    favButton.attr("data-url-animate", results[parseInt(i)].images.original.url);
+
+                    // Create a download button
+                    var downButton = $('<button>').text("Download");
+                    downButton.addClass('action-option btn btn-primary');
+                    downButton.attr("data-action", "download");
+                    downButton.attr("data-url-still", results[parseInt(i)].images.original_still.url);
+                    downButton.attr("data-url-animate", results[parseInt(i)].images.original.url);
+
+                    newCardBody.append(moreInfoButton);
+                    newCardBody.append(favButton);
+                    newCardBody.append(downButton);
+
 
                     // Appending the gifDiv to the "#gifs-appear-here" div in the HTML
-                    $("#gifs-appear-here").append(gifDiv);
+                    newCard.append(newCardBody);
+                    gifDiv.append(newCard);
+                    newRow.append(gifDiv);
+
+                    $("#gifs-appear-here").append(newRow);
                 }
             }
         });
@@ -256,6 +291,18 @@ $(document).ready(function () {
         var action = $(this).attr("data-action");
         console.log("Action " + action)
 
+        // Handle moreInfo action
+        if (action === "moreInfo") {
+            console.log("MoreInfo");
+            var result = $(this).attr("data-results");
+            var index = $(this).attr("data-index");
+
+            var data = appData.gifData.data[parseInt(index)];
+            console.log(data);
+            console.log(JSON.stringify(data));
+        }
+
+
         // Handle favorite action
         // Look for dups
         if (action === "favorite") {
@@ -275,14 +322,12 @@ $(document).ready(function () {
 
         // Handle download action
         if (action === "download") {
-            console.log("Download");
-            console.log($(this).attr("data-url-still"));
-
             var urlDown = $(this).attr("data-url-still");
-            console.log(urlDown);
-
+            var parts = urlDown.split('/');
+            var lastSegment = parts.pop() || parts.pop();
+            var fileStill = "giphy_still.gif"
             $.ajax({
-                url: 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/172905/test.pdf',
+                url: urlDown,
                 method: 'GET',
                 xhrFields: {
                     responseType: 'blob'
@@ -291,12 +336,35 @@ $(document).ready(function () {
                     var a = document.createElement('a');
                     var url = window.URL.createObjectURL(data);
                     a.href = url;
-                    a.download = 'myfile.pdf';
+                    a.download = fileStill;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                }
+            });
+
+            urlDown = $(this).attr("data-url-animate");
+            parts = urlDown.split('/');
+            lastSegment = parts.pop() || parts.pop();
+            console.log(lastSegment);
+            var fileAnimate = "giphy_animate.gif"
+            $.ajax({
+                url: urlDown,
+                method: 'GET',
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function (data) {
+                    var a = document.createElement('a');
+                    var url = window.URL.createObjectURL(data);
+                    a.href = url;
+                    a.download = fileAnimate;
                     a.click();
                     window.URL.revokeObjectURL(url);
                 }
             });
         }
+
+
     });
 
     // Update favorites
