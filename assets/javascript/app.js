@@ -9,9 +9,12 @@
 // Improve README.md
 // Improve style
 // Do responsive display
+// More info button only works now with first 10
 // Fix problem with creating a new search button where search keyword is empty
 //    Also test for case where search returns 0 items
 // Do Download function
+// Allow user to set a file name on download
+// Find a better initial file name - maybe use title
 $(document).ready(function () {
 
     var appData = {
@@ -300,8 +303,12 @@ $(document).ready(function () {
             var data = appData.gifData.data[parseInt(index)];
             console.log(data);
             console.log(JSON.stringify(data));
+            var jsonString = JSON.stringify(data);
+            var jsonPretty = JSON.stringify(JSON.parse(jsonString),null,2);  
+            var preElem = $("<pre>");
+            preElem.html(jsonPretty);
+            $("#modalText").html(preElem);
         }
-
 
         // Handle favorite action
         // Look for dups
@@ -363,7 +370,6 @@ $(document).ready(function () {
                 }
             });
         }
-
 
     });
 
