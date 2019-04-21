@@ -1,3 +1,13 @@
+// HTML for Bootcamp Homework #6
+// Paul Raab
+// Raab Enterprises LLC
+// 4/12/2019
+// Building a Giphy API interface with image display functionality
+// Key new functionality:
+// AJAX error handling
+// Image download
+// JSON download and pretty display from Giphy in a modal dialog
+// 
 // ToDo
 // DONE - Don't allow duplicate favorites
 // Allow user to set how many images per row
@@ -5,70 +15,102 @@
 // Integrate this search with additional APIs such as OMDB, 
 //   or Bands in Town. Be creative and build something you are 
 //   proud to showcase in your portfolio
-// Persist favorites with localStorage
+// DONE - Persist favorites with localStorage
 // Improve README.md
 // Improve style
 // DONE - Do responsive display
 // DONE - Fix that more info button only works now with last 10
 // DONE - Fix problem with creating a new search button where search keyword is empty
 // Also test for case where search returns 0 or less than 10 items - this seems OK as is
-// Done - Do download function - the name is currently fixed
+// DONE - Do download function - the name is currently fixed
 // Find a better initial file name - maybe use title
 // Allow user to set a file name on download
+// Don't allow duplicate new buttons
+// Remove a button if it generates zero returns on a query
 $(document).ready(function () {
 
     var appData = {
         item: null,
+        isQueryOn: false,
         gifData: [],
         queryURL: null,
         isShowGifs: true,
         currentItem: null,
+        initialList: ["cat", "dog", "horse", "pig", "fish"],
         favoritesStill: [],
         favoritesAnimate: [],
+        favoritesRating: [],
+        favoritesTitle: [],
         favPointer: 0,
         iOffset: 0
     }
 
-    init();
+    initApp();
 
-    // Initialize
-    function init() {
+    // Initialize application
+    function initApp() {
         $("#gifs-appear-here").show();
+        isQueryOn = false;
         isShowGifs = true;
-        console.log("Init favDiv");
-        console.log($("#favDiv"));
         $("#favDiv").hide();
+        initItemButtons();
+
+        // Get favorites from localStorage
+        appData.favoritesStill = [];
+        appData.favoritesAnimate = [];
+        appData.favoritesRating = [];
+        appData.favoritesTitle = [];
+
+        // appData.favoritesStill = localStorage.getItem("favoritesStill", JSON.parse(appData.favoritesStill));
+        // appData.favoritesAnimate = localStorage.getItem("favoritesAnimate", JSON.stringify(appData.favoritesAnimate));
+        // appData.favoritesRating = localStorage.getItem("favoritesRating", JSON.stringify(appData.favoritesRating));
+        // appData.favoritesTitle = localStorage.getItem("favoritesTitle", JSON.stringify(appData.favoritesTitle));
+        var stills = localStorage.getItem("favoritesStill");
+        if (stills !== null) {
+            appData.favoritesStill = JSON.parse(stills);
+            var animates = localStorage.getItem("favoritesAnimate");
+            if (animates !== null) {
+                appData.favoritesAnimate = JSON.parse(animates);
+            }
+            var ratings = localStorage.getItem("favoritesRating");
+            if (ratings !== null) {
+                appData.favoritesRating = JSON.parse(ratings);
+            }
+            var titles = localStorage.getItem("favoritesTitle");
+            if (titles !== null) {
+                appData.favoritesTitle = JSON.parse(titles);
+            }
+            rebuildFavorites();
+        }
+
+    }
+
+    // Create initial buttons
+    function initItemButtons() {
+
+        $("#buttons-appear-here").empty();
 
         // Create initial buttons
-        var newButton = $("<button>").text("cat");
-        newButton.attr("data-item", "cat");
-        newButton.addClass("itemButton btn btn-primary margin-left");
-        $("#buttons-appear-here").append(newButton);
-        var newButton = $("<button>").text("dog");
-        newButton.attr("data-item", "dog");
-        newButton.addClass("itemButton btn btn-primary margin-left");
-        $("#buttons-appear-here").append(newButton);
-        var newButton = $("<button>").text("fish");
-        newButton.attr("data-item", "fish");
-        newButton.addClass("itemButton btn btn-primary margin-left");
-        $("#buttons-appear-here").append(newButton);
-        var newButton = $("<button>").text("pig");
-        newButton.attr("data-item", "pig");
-        newButton.addClass("itemButton btn btn-primary margin-left");
-        $("#buttons-appear-here").append(newButton);
-        var newButton = $("<button>").text("horse");
-        newButton.attr("data-item", "horse");
-        newButton.addClass("itemButton btn btn-primary margin-left");
-        $("#buttons-appear-here").append(newButton);
-
+        appData.initialList.forEach(function (element, i) {
+            var newButton = $("<button>").text(element);
+            newButton.attr("data-item", element);
+            newButton.addClass("itemButton btn btn-primary margin-right margin-top");
+            $("#buttons-appear-here").append(newButton);
+        });
     }
 
     // Add ten more images
     // This is done by incrementing by ten the offset variable
     // used in the Giphy query and getting the next set of images
     $("#addTen").on("click", function () {
-        appData.iOffset += 10;
-        displayImages();
+        if (appData.isQueryOn) {
+            appData.iOffset += 10;
+            displayImages();
+        }
+        // If we've not done any queries - then return
+        else {
+            return;
+        }
     });
 
     // Show gifs/favorites
@@ -109,6 +151,10 @@ $(document).ready(function () {
         // Store the appData.item clicked
         appData.item = $(this).attr("data-item");
 
+        if (appData.item === null) {
+            return;
+        }
+
         // Display images if new item
         // If not just return
         if (appData.currentItem === null ||
@@ -147,7 +193,7 @@ $(document).ready(function () {
 
         // Create a new button
         var newButton = $("<button>").text($("#newItem").val()).attr("data-item", $("#newItem").val());
-        newButton.addClass("itemButton btn btn-primary margin-left");
+        newButton.addClass("itemButton btn btn-primary margin-right margin-top");
         $("#buttons-appear-here").append(newButton);
     });
 
@@ -160,8 +206,9 @@ $(document).ready(function () {
         // We also limit the response to 10 gifs using limit=10.
         // We include my API key in the query.
         // Use https instead of http
+        // I've hardcoded api_key, limit, and rating
         appData.queryURL = "https://api.giphy.com/v1/gifs/search?q=" +
-            appData.item.toLowerCase() + "&api_key=pMBqTQ3Iw2LTMDyV2fmtQs7YYbFOr7K3&limit=10";
+            appData.item.toLowerCase() + "&api_key=pMBqTQ3Iw2LTMDyV2fmtQs7YYbFOr7K3&limit=10&rating=PG";
 
         // Performing our AJAX GET request
         appData.queryURL += "&offset=" + appData.iOffset;
@@ -171,13 +218,14 @@ $(document).ready(function () {
             method: "GET"
         }).then(function (response) {
 
+            // Successful query
+            appData.isQueryOn = true;
+
             // Store the response
             appData.gifData.push(response);
 
             // Storing an array of results in the results variable
             var results = response.data;
-
-            // console.log(JSON.stringify(results[0]));
 
             // Create a new row for this set of Gifs
             var newRow = $("<div>").addClass("row align-items-center");
@@ -224,8 +272,6 @@ $(document).ready(function () {
                     // the "gifDiv" div created
                     newCardBody.append(itemImage);
 
-                    // gifDiv.append(itemImage);
-
                     // Storing the result item's rating
                     var rating = results[parseInt(i)].rating;
 
@@ -239,7 +285,7 @@ $(document).ready(function () {
 
                     // Create a moreInfo button
                     var moreInfoButton = $('<button>').text("More Info");
-                    moreInfoButton.addClass('action-option btn btn-info');
+                    moreInfoButton.addClass('action-option btn btn-info btn-sm margin-left margin-top');
                     moreInfoButton.attr("data-toggle", "modal");
                     moreInfoButton.attr("data-target", "#moreInfoModal");
                     moreInfoButton.attr("data-action", "moreInfo");
@@ -248,14 +294,16 @@ $(document).ready(function () {
 
                     // Create a favorite button
                     var favButton = $('<button>').text("Favorite");
-                    favButton.addClass('action-option btn btn-primary');
+                    favButton.addClass('action-option btn btn-primary btn-sm margin-left margin-top');
                     favButton.attr("data-action", "favorite");
                     favButton.attr("data-url-still", results[parseInt(i)].images.original_still.url);
                     favButton.attr("data-url-animate", results[parseInt(i)].images.original.url);
+                    favButton.attr("data-rating", results[parseInt(i)].rating);
+                    favButton.attr("data-title", results[parseInt(i)].title);
 
                     // Create a download button
                     var downButton = $('<button>').text("Download");
-                    downButton.addClass('action-option btn btn-primary');
+                    downButton.addClass('action-option btn btn-primary btn-sm margin-left margin-top');
                     downButton.attr("data-action", "download");
                     downButton.attr("data-url-still", results[parseInt(i)].images.original_still.url);
                     downButton.attr("data-url-animate", results[parseInt(i)].images.original.url);
@@ -321,8 +369,6 @@ $(document).ready(function () {
             var responseIndex = Math.floor(parseInt(index) / 10);
             var arrayIndex = parseInt(index) % 10;
             var data = appData.gifData[responseIndex].data[arrayIndex];
-            console.log(data);
-            console.log(JSON.stringify(data));
             var jsonString = JSON.stringify(data);
             var jsonPretty = JSON.stringify(JSON.parse(jsonString), null, 2);
             var preElem = $("<pre>");
@@ -331,31 +377,41 @@ $(document).ready(function () {
         }
 
         // Handle favorite action
-        // Look for dups
         if (action === "favorite") {
-            console.log("Favorite");
-            console.log($(this).attr("data-url-still"));
+
+            // Look for dups
             for (var i = 0; i < appData.favoritesStill.length; i++) {
                 if (appData.favoritesStill[i] === $(this).attr("data-url-still")) {
-                    console.log("Dup match");
                     return;
                 }
             }
+
+            // Add to favorites aarray
             appData.favPointer = appData.favoritesStill.length;
             appData.favoritesStill.push($(this).attr("data-url-still"));
             appData.favoritesAnimate.push($(this).attr("data-url-animate"));
+            appData.favoritesRating.push($(this).attr("data-rating"));
+            appData.favoritesTitle.push($(this).attr("data-title"));
 
             // Write to local storage
             localStorage.setItem("favoritesStill", JSON.stringify(appData.favoritesStill));
             localStorage.setItem("favoritesAnimate", JSON.stringify(appData.favoritesAnimate));
+            localStorage.setItem("favoritesRating", JSON.stringify(appData.favoritesRating));
+            localStorage.setItem("favoritesTitle", JSON.stringify(appData.favoritesTitle));
+
+            // Update favorites display
             updateFavorites();
         }
 
         // Handle download action
         if (action === "download") {
+
+            // Extract last segment of url
             var urlDown = $(this).attr("data-url-still");
             var parts = urlDown.split('/');
             var lastSegment = parts.pop() || parts.pop();
+
+            // Hard code file name for now
             var fileStill = "giphy_still.gif"
             $.ajax({
                 url: urlDown,
@@ -373,10 +429,12 @@ $(document).ready(function () {
                 }
             });
 
+            // Extract last segment of url
             urlDown = $(this).attr("data-url-animate");
             parts = urlDown.split('/');
             lastSegment = parts.pop() || parts.pop();
-            console.log(lastSegment);
+
+            // Hard code file name for now
             var fileAnimate = "giphy_animate.gif"
             $.ajax({
                 url: urlDown,
@@ -427,6 +485,8 @@ $(document).ready(function () {
             "src": appData.favoritesStill[appData.favPointer],
             "data-still": appData.favoritesStill[appData.favPointer],
             "data-animate": appData.favoritesAnimate[appData.favPointer],
+            "data-rating": appData.favoritesRating[appData.favPointer],
+            "data-title": appData.favoritesTitle[appData.favPointer],
             "data-index": appData.favPointer,
             "data-state": "still"
         });
@@ -435,16 +495,27 @@ $(document).ready(function () {
         // the "gifDiv" div created
         newCardBody.append(itemImage);
 
+        // Storing the result item's rating
+        var rating = appData.favoritesRating[appData.favPointer];
+
+        // Storing the result item's title
+        var title = appData.favoritesTitle[appData.favPointer];
+
+        // Creating a paragraph tag with the result item's rating
+        var p = $("<p>").html("Rating: " + rating + "<br>" + "Title: " + title);
+        p.addClass("card-text");
+        newCardBody.append(p);
+
         // Create a download button
         var downButton = $('<button>').text("Download");
-        downButton.addClass('action-option btn btn-primary');
+        downButton.addClass('action-option btn btn-primary btn-sm margin-left margin-top');
         downButton.attr("data-action", "download");
         downButton.attr("data-url-still", appData.favoritesStill[appData.favPointer]);
         downButton.attr("data-url-animate", appData.favoritesAnimate[appData.favPointer]);
 
         // Create a delete button
         var deleteButton = $('<button>').text("Delete");
-        deleteButton.addClass('action-option btn btn-primary');
+        deleteButton.addClass('action-option btn btn-primary btn-sm margin-left margin-top');
         deleteButton.attr("data-action", "delete");
         deleteButton.attr("data-index", appData.favPointer);
 
@@ -461,19 +532,27 @@ $(document).ready(function () {
 
     }
 
+    // Clear new buttons
+    $('#clearNew').on("click", function () {
+        initItemButtons();
+    });
+
     // Clear favorites
     $('#clearFav').on("click", function () {
         appData.favoritesStill = [];
         appData.favoritesAnimate = [];
+        appData.favoritesRating = [];
+        appData.favoritesTitle = [];
         appData.favPointer = 0;
+        localStorage.setItem("favoritesStill", JSON.stringify(appData.favoritesStill));
+        localStorage.setItem("favoritesAnimate", JSON.stringify(appData.favoritesAnimate));
+        localStorage.setItem("favoritesRating", JSON.stringify(appData.favoritesRating));
+        localStorage.setItem("favoritesTitle", JSON.stringify(appData.favoritesTitle));
         $("#favorites").empty();
     });
 
     // Start/Stop animation of favorite images
     $("#favorites").on("click", ".fav", function () {
-
-        console.log("Click on Fav Image");
-        console.log(JSON.stringify($(this)));
 
         // $(this) is the element with class 'gif' that was clicked on
         var state = $(this).attr("data-state");
@@ -498,19 +577,19 @@ $(document).ready(function () {
     // Delete favorite image
     $("#favorites").on("click", ".action-option", function () {
 
-        console.log("Delete Fav Image");
-        console.log($(this));
-
         // $(this) is the element with class 'action-option' that was clicked on
         // Get which button clicked by id
         var action = $(this).attr("data-action");
-        console.log("Action " + action)
 
         // Handle download action
         if (action === "download") {
+
+            // Extract last segment of url
             var urlDown = $(this).attr("data-url-still");
             var parts = urlDown.split('/');
             var lastSegment = parts.pop() || parts.pop();
+
+            // Hard code file name for now
             var fileStill = "giphy_still.gif"
             $.ajax({
                 url: urlDown,
@@ -528,10 +607,12 @@ $(document).ready(function () {
                 }
             });
 
+            // Extract last segment of url
             urlDown = $(this).attr("data-url-animate");
             parts = urlDown.split('/');
             lastSegment = parts.pop() || parts.pop();
-            console.log(lastSegment);
+
+            // Hard code file name for now
             var fileAnimate = "giphy_animate.gif"
             $.ajax({
                 url: urlDown,
@@ -564,13 +645,22 @@ $(document).ready(function () {
             var indexImg = $(this).attr("data-index");
 
             // Delete that image
-            for (var i = indexImg; i < appData.favoritesStill.length - 1; i++) {
-                appData.favoritesStill[parseInt(i)] = appData.favoritesStill[parseInt(i + 1)];
-                appData.favoritesAnimate[parseInt(i)] = appData.favoritesAnimate[parseInt(i + 1)];
+            for (var i = parseInt(indexImg); i < appData.favoritesStill.length - 1; i++) {
+                appData.favoritesStill[parseInt(i)] = appData.favoritesStill[parseInt(i) + 1];
+                appData.favoritesAnimate[parseInt(i)] = appData.favoritesAnimate[parseInt(i) + 1];
+                appData.favoritesRating[parseInt(i)] = appData.favoritesRating[parseInt(i) + 1];
+                appData.favoritesTitle[parseInt(i)] = appData.favoritesTitle[parseInt(i) + 1];
             }
             appData.favoritesStill.length = appData.favoritesStill.length - 1;
             appData.favoritesAnimate.length = appData.favoritesAnimate.length - 1;
-            console.log(appData.favoritesStill);
+            appData.favoritesRating.length = appData.favoritesRating.length - 1;
+            appData.favoritesTitle.length = appData.favoritesTitle.length - 1;
+
+            // Update localStorage
+            localStorage.setItem("favoritesStill", JSON.stringify(appData.favoritesStill));
+            localStorage.setItem("favoritesAnimate", JSON.stringify(appData.favoritesAnimate));
+            localStorage.setItem("favoritesRating", JSON.stringify(appData.favoritesRating));
+            localStorage.setItem("favoritesTitle", JSON.stringify(appData.favoritesTitle));
 
             // Rebuild favorites from new array
             rebuildFavorites();
@@ -596,6 +686,11 @@ $(document).ready(function () {
 
     }
 
-
+    // AJAX error handler
+    // This would be triggered for example if your Giphy API key
+    // was missing or wrong.
+    $(document).ajaxError(function (event, request, settings) {
+        alert("Error requesting page " + settings.url);
+    });
 
 });

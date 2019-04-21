@@ -1,3 +1,12 @@
+<!-- HTML for Bootcamp Homework #6 -->
+<!-- Paul Raab -->
+<!-- Raab Enterprises LLC -->
+<!-- 4/12/2019 -->
+<!-- Building a Giphy API interface with image display functionality -->
+<!-- Key new functionality: -->
+<!-- AJAX error handling -->
+<!-- Image download -->
+<!-- JSON download and pretty display from Giphy in a modal dialog -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -31,12 +40,15 @@
     <div class="container" id="buttons-appear-here">
     </div>
 
+    <div class="container" id="new-animals">
+        <input type="text" class=" margin-left margin-top" id="newItem" placeholder="Animal">
+        <button class="btn btn-primary btn-sm margin-left" id="newButton">New Animal</button>
+    </div>
     <div class="container" id="standard-buttons">
-        <input type="text" id="newItem" placeholder="Animal">
-        <input class="btn btn-primary" id="newButton" type="submit">
-        <button class="btn btn-primary" id="addTen">Add 10</button>
-        <button class="btn btn-primary" id="showFav">Show Favorites</button>
-        <button class="btn btn-primary" id="clearFav">Clear Favorites</button>
+        <button class="btn btn-primary btn-sm margin-left" id="clearNew">Clear New</button>
+        <button class="btn btn-primary btn-sm margin-left" id="addTen">Add 10</button>
+        <button class="btn btn-primary btn-sm margin-left" id="showFav">Show Favorites</button>
+        <button class="btn btn-primary btn-sm margin-left" id="clearFav">Clear Favorites</button>
     </div>
 
 
@@ -52,7 +64,7 @@
     <!-- Modal dialog to display more information for an image -->
     <div class="modal fade" id="moreInfoModal" tabindex="-1" role="dialog" aria-labelledby="moreInfoModalTitle"
         aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="moreInfoModalTitle">More Info - Giphy JSON for this image</h5>
