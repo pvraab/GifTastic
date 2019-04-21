@@ -38,6 +38,29 @@ $(document).ready(function () {
         console.log("Init favDiv");
         console.log($("#favDiv"));
         $("#favDiv").hide();
+
+        // Create initial buttons
+        var newButton = $("<button>").text("cat");
+        newButton.attr("data-item", "cat");
+        newButton.addClass("itemButton btn btn-primary margin-left");
+        $("#buttons-appear-here").append(newButton);
+        var newButton = $("<button>").text("dog");
+        newButton.attr("data-item", "dog");
+        newButton.addClass("itemButton btn btn-primary margin-left");
+        $("#buttons-appear-here").append(newButton);
+        var newButton = $("<button>").text("fish");
+        newButton.attr("data-item", "fish");
+        newButton.addClass("itemButton btn btn-primary margin-left");
+        $("#buttons-appear-here").append(newButton);
+        var newButton = $("<button>").text("pig");
+        newButton.attr("data-item", "pig");
+        newButton.addClass("itemButton btn btn-primary margin-left");
+        $("#buttons-appear-here").append(newButton);
+        var newButton = $("<button>").text("horse");
+        newButton.attr("data-item", "horse");
+        newButton.addClass("itemButton btn btn-primary margin-left");
+        $("#buttons-appear-here").append(newButton);
+
     }
 
     // Add ten more images
@@ -124,7 +147,7 @@ $(document).ready(function () {
 
         // Create a new button
         var newButton = $("<button>").text($("#newItem").val()).attr("data-item", $("#newItem").val());
-        newButton.addClass("btn btn-primary itemButton");
+        newButton.addClass("itemButton btn btn-primary margin-left");
         $("#buttons-appear-here").append(newButton);
     });
 
@@ -217,12 +240,14 @@ $(document).ready(function () {
 
                     // Create a moreInfo button
                     var moreInfoButton = $('<button>').text("More Info");
-                    moreInfoButton.addClass('action-option btn btn-info btn-lg');
+                    moreInfoButton.addClass('action-option btn btn-info');
                     moreInfoButton.attr("data-toggle", "modal");
                     moreInfoButton.attr("data-target", "#moreInfoModal");
                     moreInfoButton.attr("data-action", "moreInfo");
                     moreInfoButton.attr("data-results", results[parseInt(i)]);
                     moreInfoButton.attr("data-index", parseInt(i));
+                    console.log("MoreInfo object");
+                    console.log(moreInfoButton);
 
                     // Create a favorite button
                     var favButton = $('<button>').text("Favorite");

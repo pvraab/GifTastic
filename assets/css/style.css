@@ -13,6 +13,23 @@ img {
   max-height: 100%;
 }
 
+.button{
+  display: flex;
+}
+
+.button > button{
+  display: inline-block;
+}
+
+.margin-left{
+  margin-left: 5px;
+}
+
+
+#standard-buttons {
+  margin: 5px;
+}
+
 .gifCard {
   width: 300px;
   text-align: center;

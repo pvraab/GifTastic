@@ -29,46 +29,14 @@
     </div>
 
     <div class="container" id="buttons-appear-here">
-        <!-- <div class="row align-items-center"> -->
-        <!-- <div class="col-sm-12 col-md-6 col-lg-3 d-flex align-items-stretch" id="buttons-appear-here"> -->
-        <button class="itemButton btn btn-primary" data-item="Cat">Cat</button>
-        <button class="itemButton btn btn-primary" data-item="Dog">Dog</button>
-        <button class="itemButton btn btn-primary" data-item="Pig">Pig</button>
-        <button class="itemButton btn btn-primary" data-item="Horse">Horse</button>
-        <button class="itemButton btn btn-primary" data-item="Kangaroo">Kangaroo</button>
-        <!-- </div> -->
-        <!-- </div> -->
     </div>
 
-    <div class="container">
-        <!-- <div class="row align-items-center"> -->
-        <!-- <div class="col-sm-12 col-md-6 col-lg-3 d-flex align-items-stretch" id="newItemButton"> -->
-        <div class="btn-toolbar mb-3" role="toolbar" aria-label="Toolbar with button groups">
-            <div class="btn-group mr-2" role="group" aria-label="First group">
-                <button type="button" class="btn btn-secondary">1</button>
-                <button type="button" class="btn btn-secondary">2</button>
-                <button type="button" class="btn btn-secondary">3</button>
-                <button type="button" class="btn btn-secondary">4</button>
-            </div>
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <div class="input-group-text" id="btnGroupAddon">@</div>
-                </div>
-                <input type="text" class="form-control" placeholder="Input group example"
-                    aria-label="Input group example" aria-describedby="btnGroupAddon">
-            </div>
-        </div>
-
-        <div class="input-group">
-            <input type="text" id="newItem" placeholder="Animal">
-            <input class="btn btn-primary" id="newButton" type="submit">
-            <button class="btn btn-primary" id="addTen">Add 10</button>
-            <button class="btn btn-primary" id="showFav">Show Favorites</button>
-            <button class="btn btn-primary" id="clearFav">Clear Favorites</button>
-        </div>
-
-        <!-- </div> -->
-        <!-- </div> -->
+    <div class="container" id="standard-buttons">
+        <input type="text" id="newItem" placeholder="Animal">
+        <input class="btn btn-primary" id="newButton" type="submit">
+        <button class="btn btn-primary" id="addTen">Add 10</button>
+        <button class="btn btn-primary" id="showFav">Show Favorites</button>
+        <button class="btn btn-primary" id="clearFav">Clear Favorites</button>
     </div>
 
 
@@ -82,12 +50,12 @@
     </div>
 
     <!-- Modal dialog to display more information for an image -->
-    <div class="modal fade" id="moreInfoModal" tabindex="-1" role="dialog"
-        aria-labelledby="moreInfoModalTitle" aria-hidden="true">
+    <div class="modal fade" id="moreInfoModal" tabindex="-1" role="dialog" aria-labelledby="moreInfoModalTitle"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="moreInfoModalTitle">More Info</h5>
+                    <h5 class="modal-title" id="moreInfoModalTitle">More Info - Giphy JSON for this image</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
