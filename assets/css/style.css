@@ -25,7 +25,6 @@ img {
   margin-left: 5px;
 }
 
-
 #standard-buttons {
   margin: 5px;
 }
@@ -38,6 +37,18 @@ img {
 .gifImage {
   height: 250px;
   width: 250px;
+  margin: 0 auto;
+  border-radius: 5px;
+}
+
+.favCard {
+  width: 600px;
+  text-align: center;
+}
+
+.favImage {
+  height: 550px;
+  width: 550px;
   margin: 0 auto;
   border-radius: 5px;
 }

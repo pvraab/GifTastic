@@ -1,25 +1,25 @@
 // ToDo
 // DONE - Don't allow duplicate favorites
 // Allow user to set how many images per row
-// Pop up a modal window with full JSON for an image
+// DONE - Pop up a modal window with full JSON for an image
 // Integrate this search with additional APIs such as OMDB, 
 //   or Bands in Town. Be creative and build something you are 
 //   proud to showcase in your portfolio
 // Persist favorites with localStorage
 // Improve README.md
 // Improve style
-// Do responsive display
-// More info button only works now with first 10
-// Fix problem with creating a new search button where search keyword is empty
-//    Also test for case where search returns 0 items
-// Do Download function
-// Allow user to set a file name on download
+// DONE - Do responsive display
+// DONE - Fix that more info button only works now with last 10
+// DONE - Fix problem with creating a new search button where search keyword is empty
+// Also test for case where search returns 0 or less than 10 items - this seems OK as is
+// Done - Do download function - the name is currently fixed
 // Find a better initial file name - maybe use title
+// Allow user to set a file name on download
 $(document).ready(function () {
 
     var appData = {
         item: null,
-        gifData: null,
+        gifData: [],
         queryURL: null,
         isShowGifs: true,
         currentItem: null,
@@ -172,7 +172,7 @@ $(document).ready(function () {
         }).then(function (response) {
 
             // Store the response
-            appData.gifData = response;
+            appData.gifData.push(response);
 
             // Storing an array of results in the results variable
             var results = response.data;
@@ -236,7 +236,6 @@ $(document).ready(function () {
                     var p = $("<p>").html("Rating: " + rating + "<br>" + "Title: " + title);
                     p.addClass("card-text");
                     newCardBody.append(p);
-                    // $(gifDiv).append(p);
 
                     // Create a moreInfo button
                     var moreInfoButton = $('<button>').text("More Info");
@@ -245,9 +244,7 @@ $(document).ready(function () {
                     moreInfoButton.attr("data-target", "#moreInfoModal");
                     moreInfoButton.attr("data-action", "moreInfo");
                     moreInfoButton.attr("data-results", results[parseInt(i)]);
-                    moreInfoButton.attr("data-index", parseInt(i));
-                    console.log("MoreInfo object");
-                    console.log(moreInfoButton);
+                    moreInfoButton.attr("data-index", parseInt(i) + parseInt(appData.iOffset));
 
                     // Create a favorite button
                     var favButton = $('<button>').text("Favorite");
@@ -285,22 +282,19 @@ $(document).ready(function () {
     // the "#gifs-appear-here" div'
     $('#gifs-appear-here').on("click", ".gif", function () {
 
-        console.log("Click on Reg Image");
-        console.log(JSON.stringify($(this)));
-
         // $(this) is the element with class 'gif' that was clicked on
         var state = $(this).attr("data-state");
 
         // $(this).attr("data-state") will either be "still" or "animate"
         // If still, we change it to animate
         if (state === "still") {
-
             var newSrc = $(this).attr("data-animate");
             $(this).attr("src", newSrc);
             $(this).attr("data-state", "animate");
+        }
 
-            // OTHERWISE it's animate already, so we change it to still
-        } else {
+        // Otherwise it's animated already, so we change it to still
+        else {
             var newSrc = $(this).attr("data-still");
             $(this).attr("src", newSrc);
             $(this).attr("data-state", "still");
@@ -312,24 +306,25 @@ $(document).ready(function () {
     // the "#gifs-appear-here" div
     $('#gifs-appear-here').on("click", ".action-option", function () {
 
-        console.log($(this))
-
         // $(this) is the element with class 'action-option' that was clicked on
         // Get which button clicked by id
         var action = $(this).attr("data-action");
-        console.log("Action " + action)
 
         // Handle moreInfo action
         if (action === "moreInfo") {
-            console.log("MoreInfo");
-            var result = $(this).attr("data-results");
-            var index = $(this).attr("data-index");
 
-            var data = appData.gifData.data[parseInt(index)];
+            // Compute indices into gifData array holding the responses for each 
+            // set of AJAX queries with different offsets.
+            // Then compute index into response array for an individual set of 
+            // Gifs 
+            var index = $(this).attr("data-index");
+            var responseIndex = Math.floor(parseInt(index) / 10);
+            var arrayIndex = parseInt(index) % 10;
+            var data = appData.gifData[responseIndex].data[arrayIndex];
             console.log(data);
             console.log(JSON.stringify(data));
             var jsonString = JSON.stringify(data);
-            var jsonPretty = JSON.stringify(JSON.parse(jsonString),null,2);  
+            var jsonPretty = JSON.stringify(JSON.parse(jsonString), null, 2);
             var preElem = $("<pre>");
             preElem.html(jsonPretty);
             $("#modalText").html(preElem);
@@ -349,6 +344,10 @@ $(document).ready(function () {
             appData.favPointer = appData.favoritesStill.length;
             appData.favoritesStill.push($(this).attr("data-url-still"));
             appData.favoritesAnimate.push($(this).attr("data-url-animate"));
+
+            // Write to local storage
+            localStorage.setItem("favoritesStill", JSON.stringify(appData.favoritesStill));
+            localStorage.setItem("favoritesAnimate", JSON.stringify(appData.favoritesAnimate));
             updateFavorites();
         }
 
@@ -401,15 +400,20 @@ $(document).ready(function () {
     // Update favorites
     function updateFavorites() {
 
-        // Creating a div for the gif
-        var gifDiv = $("<div>");
+        // Create a new row for this set of Gifs
+        var newRow = $("<div>").addClass("row align-items-center");
+
+        // Creating a div for the favorite gif
+        var gifDiv = $("<div>").addClass("col-sm-12 col-md-12 col-lg-12 d-flex align-items-stretch");
+
+        // Create a card for image
+        var newCard = $("<div>").addClass("card favCard");
+        var newCardBody = $("<div>").addClass("card-body");
 
         // Creating an image tag with class of "fav"
-        var itemImage = $("<img>").addClass("fav img-fluid");
+        var itemImage = $("<img>").addClass("fav gif favImage card-img-top img-fluid");
 
-        // Giving the image tag an src attribute of a property pulled off the
-        // result item
-        // Why do this versus below
+        // Giving the image tag an src attribute from the favoritesStill array
         itemImage.attr("src", appData.favoritesStill[appData.favPointer]);
 
         // I add these attributes to the image: 
@@ -429,7 +433,14 @@ $(document).ready(function () {
 
         // Append itemImage, image buttons, and image info to 
         // the "gifDiv" div created
-        gifDiv.append(itemImage);
+        newCardBody.append(itemImage);
+
+        // Create a download button
+        var downButton = $('<button>').text("Download");
+        downButton.addClass('action-option btn btn-primary');
+        downButton.attr("data-action", "download");
+        downButton.attr("data-url-still", appData.favoritesStill[appData.favPointer]);
+        downButton.attr("data-url-animate", appData.favoritesAnimate[appData.favPointer]);
 
         // Create a delete button
         var deleteButton = $('<button>').text("Delete");
@@ -437,7 +448,13 @@ $(document).ready(function () {
         deleteButton.attr("data-action", "delete");
         deleteButton.attr("data-index", appData.favPointer);
 
-        $(gifDiv).append(deleteButton);
+        newCardBody.append(downButton);
+        newCardBody.append(deleteButton);
+
+        // Appending the gifDiv to the "#gifs-appear-here" div in the HTML
+        newCard.append(newCardBody);
+        gifDiv.append(newCard);
+        newRow.append(gifDiv);
 
         // Appending the gifDiv to the "#gifs-appear-here" div in the HTML
         $("#favorites").append(gifDiv);
@@ -489,6 +506,51 @@ $(document).ready(function () {
         var action = $(this).attr("data-action");
         console.log("Action " + action)
 
+        // Handle download action
+        if (action === "download") {
+            var urlDown = $(this).attr("data-url-still");
+            var parts = urlDown.split('/');
+            var lastSegment = parts.pop() || parts.pop();
+            var fileStill = "giphy_still.gif"
+            $.ajax({
+                url: urlDown,
+                method: 'GET',
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function (data) {
+                    var a = document.createElement('a');
+                    var url = window.URL.createObjectURL(data);
+                    a.href = url;
+                    a.download = fileStill;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                }
+            });
+
+            urlDown = $(this).attr("data-url-animate");
+            parts = urlDown.split('/');
+            lastSegment = parts.pop() || parts.pop();
+            console.log(lastSegment);
+            var fileAnimate = "giphy_animate.gif"
+            $.ajax({
+                url: urlDown,
+                method: 'GET',
+                xhrFields: {
+                    responseType: 'blob'
+                },
+                success: function (data) {
+                    var a = document.createElement('a');
+                    var url = window.URL.createObjectURL(data);
+                    a.href = url;
+                    a.download = fileAnimate;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                }
+            });
+        }
+
+
         // Handle delete action
         if (action === "delete") {
 
@@ -513,8 +575,6 @@ $(document).ready(function () {
             // Rebuild favorites from new array
             rebuildFavorites();
 
-            // Refresh page
-            // location.reload();
         }
     });
 
@@ -530,44 +590,8 @@ $(document).ready(function () {
         var itemImage = $("<img>").addClass("fav img-fluid");
 
         for (var i = 0; i < appData.favoritesStill.length; i++) {
-
-
-            // Giving the image tag an src attribute of a property pulled off the
-            // result item
-            // Why do this versus below
-            itemImage.attr("src", appData.favoritesStill[parseInt(i)]);
-
-            // I add these attributes to the image: 
-            //   src, data-still, data-animate, data-state, class
-            // data-still is the still image version
-            // data-animate is the animated image version
-            // data-state is the current image state still/animate
-            // Note: Custom attributes prefixed with "data-" will be completely ignored by the user agent.
-            // From: https://www.w3schools.com/tags/att_global_data.asp
-            itemImage.attr({
-                "src": appData.favoritesStill[parseInt(i)],
-                "data-still": appData.favoritesStill[parseInt(i)],
-                "data-animate": appData.favoritesAnimate[parseInt(i)],
-                "data-index": i,
-                "data-state": "still"
-            });
-
-            // Append itemImage, image buttons, and image info to 
-            // the "gifDiv" div created
-            gifDiv.append(itemImage);
-
-            // Create a delete button
-            var deleteButton = $('<button>').text("Delete");
-            deleteButton.addClass('action-option btn btn-primary');
-            deleteButton.attr("data-action", "delete");
-            deleteButton.attr("data-index", i);
-
             appData.favPointer = i;
-
-            $(gifDiv).append(deleteButton);
-
-            // Appending the gifDiv to the "#gifs-appear-here" div in the HTML
-            $("#favorites").append(gifDiv);
+            updateFavorites();
         }
 
     }
